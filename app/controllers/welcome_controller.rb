@@ -1,16 +1,16 @@
 class WelcomeController < ApplicationController
   def index
     require 'koala'
-    @oauth = Koala::Facebook::OAuth.new(ENV['autofblive_fb_app_id'], ENV['autofblive_fb_app_secret'], "http://localhost:3000/")
+    @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), "http://localhost:3000/")
     if request.GET['code']
       setup
     end
 
-    if cookies[:fb_user_access_token] && cookies[:fb_page_access_token]
-      @graph_user = Koala::Facebook::API.new(cookies[:fb_user_access_token])
-      @graph_page = Koala::Facebook::API.new(cookies[:fb_page_access_token])
+    if getconfig('fb_user_access_token') != '0' && getconfig('fb_page_access_token') != '0'
+      @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
+      @graph_page = Koala::Facebook::API.new(getconfig('fb_page_access_token'))
       @live_video_result = @graph_page.put_connections(
-        ENV['autofblive_fb_page_id'],
+        getconfig('fb_page_id'),
         "live_videos",
       #  #:content_tags => '',
         :description => 'This is Davids Long desc of this video!!',
@@ -32,9 +32,27 @@ class WelcomeController < ApplicationController
   end
 
   def setup
-    cookies[:fb_user_access_token] = @oauth.get_access_token(request.GET['code'])
-    @graph_user = Koala::Facebook::API.new(cookies[:fb_user_access_token])
-    cookies[:fb_page_access_token] = @graph_user.get_page_access_token(ENV['autofblive_fb_page_id'])
+    setconfig('fb_user_access_token',@oauth.get_access_token(request.GET['code']))
+    @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
+    setconfig('fb_page_access_token',@graph_user.get_page_access_token(getconfig('fb_page_id')))
     redirect_to "http://localhost:3000/"
+  end
+
+  def getconfig(configname)
+    thisconfig = Config.where(:name => configname)
+    if thisconfig.count == 1
+      return thisconfig.first.value
+    else
+      return false
+    end
+  end
+
+  def setconfig(configname,configvalue)
+    if getconfig configname == 0
+      Config.new(:name => configname, :value=> configvalue).save
+    else
+      thisconfig = Config.where(:name => configname)
+      thisconfig.update(value: configvalue)
+    end
   end
 end
