@@ -1,5 +1,6 @@
 class WelcomeController < ApplicationController
   def index
+    p request.original_url
     require 'koala'
     @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), "http://localhost:3000/")
     if request.GET['code']
@@ -43,7 +44,7 @@ class WelcomeController < ApplicationController
     if thisconfig.count == 1
       return thisconfig.first.value
     else
-      return false
+      return '0'
     end
   end
 

@@ -6,5 +6,18 @@
 
 ## start streaming
 ffmpeg \
-	-re \
-	-ar 44100 -ac 2 -acodec pcm_s16le -f s16le -ac 2 -i /dev/zero -f h264 -i - -vcodec copy -acodec aac -ab 128k -g 120 -strict experimental -f flv $1
+  -y \
+  -thread_queue_size 1024 \
+  -re \
+  -f alsa \
+  -thread_queue_size 1025 \
+  -i hw:2,0 \
+  -f v4l2 \
+  -thread_queue_size 1026 \
+  -i /dev/video0 \
+  -vcodec h264 \
+  -acodec aac \
+  -strict experimental \
+  -f flv \
+  -b:v 300k \
+  -bufsize 300k $1
