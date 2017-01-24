@@ -1,10 +1,6 @@
 class WelcomeController < ApplicationController
-<<<<<<< HEAD
-  def index
-    p request.original_url
-=======
   def inc
->>>>>>> 8937b0bd5d48d97a8ddbda4bfefcb156afb0be83
+    p request.original_url
     require 'koala'
     @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), "http://localhost:3000/")
     if request.GET['code']
