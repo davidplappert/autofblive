@@ -1,0 +1,108 @@
+<link href="/assets/reset.css" media="all" rel="stylesheet" type="text/css" />
+<link href="/assets/vegas.min.css" media="all" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css?family=Arvo" rel="stylesheet">
+<script>
+  $(document).ready(function() {
+    var eventSlides = [{src: '/assets/prayer-slide.jpg'}];
+    var eventInfo = [{time: '', name:''}];
+    <% @outputEvents.each do |event| %>
+      eventSlides.push({ src: '<%=event[:cover].html_safe%>' });
+      eventInfo.push({
+        time: '<%=event[:time].strftime("%b<br />%d").html_safe%>',
+        name: '<%=event[:name].html_safe%>',
+      });
+    <% end %>
+    $.getScript("/assets/fullscreen.min.js",function(){
+      $('div#mySlider').click(function(){
+        if($(document).fullScreen()){
+          $(document).fullScreen(false);
+        }else{
+          $(document).fullScreen(true);
+        }
+      });
+    });
+    $.getScript("/assets/vegas.min.js", function(){
+      $('#mySlider').vegas({
+          preload: true,
+          timer: false,
+          delay: 15000,
+          transition: 'random',
+          animation: 'random',
+          slides: eventSlides,
+          walk: function (index, slideSettings) {
+            console.log(index,slideSettings, eventInfo[index]);
+            if (eventInfo[index]['name'] == ""){
+              $("div#eventInfo").hide();
+            }else{
+              $("div#eventInfo").show();
+              $('div#dateTime').html(eventInfo[index]['time']);
+              $('div#eventName').html(eventInfo[index]['name']);
+            }
+          },
+      });
+    });
+  });
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css?family=Poppins:300');
+  body {
+    background-color:black;
+    padding:0;
+    margin:0;
+    border:0;
+    font-family: 'Poppins', sans-serif;
+  }
+  div#container {
+    width:1920px;
+    height:1080px;
+    display:block;
+    overflow:hidden;
+  }
+  div#eventInfo {
+    position:absolute;
+    left:0px;
+    bottom:0px;
+    text-align:center;
+    margin-left:50px;
+    margin-bottom:50px;
+    font-weight:bold;
+    color:white;
+    z-index: 999999999;
+    display:none;
+  }
+  div#dateTime {
+    border:5px solid white;
+    border-radius: 15px;
+    padding:10px;
+    background-color:black;
+    float:left;
+    font-size:100px;
+    margin-right:100px;
+    width:200px;
+  }
+  div#eventName {
+    margin-left:100px;
+    overflow:hidden;
+    white-space: nowrap;
+    font-size:175px;
+    padding-top:20px;
+  }
+  div#mySlider {
+    position:absolute;
+    top:0;
+    left:0;
+    width:1920px;
+    height:1080px;
+    display:block;
+    padding:0;
+    margin:0;
+    border:0;
+  }
+</style>
+<div id="container">
+  <div id="mySlider"></div>
+  <div id="eventInfo">
+    <div id="dateTime">Feb<br />26</div>
+    <div id="eventName">Valetine Banquet</div>
+  </div>
+</div>
