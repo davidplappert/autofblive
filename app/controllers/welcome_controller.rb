@@ -1,17 +1,18 @@
 class WelcomeController < ApplicationController
   def inc
-    p request.original_url
     require 'koala'
-    @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), "http://localhost:3000/")
+    @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), request.original_url)
     if request.GET['code']
       setup
-    end
-    if getconfig('fb_user_access_token') == '0' || getconfig('fb_page_access_token') == '0'
-      @output = "<a href='#{@oauth.url_for_oauth_code(:permissions => "pages_show_list,pages_manage_cta,read_insights,manage_pages,publish_pages,publish_actions,business_management,user_managed_groups,user_videos,user_events")}''>FB Auth 1</a>"
-      @output = @output.html_safe
     else
-      @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
-      @graph_page = Koala::Facebook::API.new(getconfig('fb_page_access_token'))
+      if getconfig('fb_user_access_token') == '0' || getconfig('fb_page_access_token') == '0'
+        @output = "<a href='#{@oauth.url_for_oauth_code(:permissions => "pages_show_list,pages_manage_cta,read_insights,manage_pages,publish_pages,publish_actions,business_management,user_managed_groups,user_videos,user_events")}''>FB Auth 1</a>"
+        @output = @output.html_safe
+      else
+        @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
+        @graph_page = Koala::Facebook::API.new(getconfig('fb_page_access_token'))
+        @output = "You are authed with FB now!"
+      end
     end
   end
 
@@ -62,14 +63,17 @@ class WelcomeController < ApplicationController
         end
       end
     end
-    p @outputEvents
+    logger.debug @outputEvents.to_yaml
   end
 
   def setup
+    logger.debug request.GET['code']
     setconfig('fb_user_access_token',@oauth.get_access_token(request.GET['code']))
     @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
+    #logger.debug getconfig('fb_page_id')
+    logger.debug getconfig('fb_user_access_token')
     setconfig('fb_page_access_token',@graph_user.get_page_access_token(getconfig('fb_page_id')))
-    redirect_to "http://localhost:3000/"
+    redirect_to request.original_url
   end
 
   private
