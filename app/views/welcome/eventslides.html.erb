@@ -3,7 +3,7 @@
 <link href="https://fonts.googleapis.com/css?family=Arvo" rel="stylesheet">
 <script>
   $(document).ready(function() {
-    var eventSlides = [{src: '/assets/prayer-slide.jpg'}];
+    var eventSlides = [{src: '/assets/prayer-slide.png'}];
     var eventInfo = [{time: '', name:''}];
     <% @outputEvents.each do |event| %>
       eventSlides.push({ src: '<%=event[:cover].html_safe%>' });
@@ -41,6 +41,20 @@
           },
       });
     });
+    //countdown timer
+    <% unless @outputTimer.nil? %>
+    $.getScript("/assets/countdown.min.js",function(){
+      var t = new Date();
+      t.setSeconds(t.getSeconds() + <%=@outputTimer%>);
+      console.log(t);
+      $('div#countdown').countdown(t, function(event) {
+        $(this).html(event.strftime('%H:%M:%S'));
+      }).on('finish.countdown', function(){
+        $(this).html('Let\'s have church!');
+        $('div#mySlider').hide();
+      });
+    });
+    <% end %>
   });
 </script>
 <style>
@@ -57,6 +71,22 @@
     height:1080px;
     display:block;
     overflow:hidden;
+  }
+  div#countdown {
+    z-index: 999999999999999;
+    background-color:black;
+    color:white;
+    position:absolute;
+    top:0;
+    left:0;
+    width:auto;
+    display:inline;
+    margin:15px;
+    padding:10px;
+    font-size:26px;
+    opacity:0.8;
+    border:3px solid black;
+    border-radius:15px;
   }
   div#eventInfo {
     position:absolute;
@@ -79,13 +109,19 @@
     font-size:100px;
     margin-right:100px;
     width:200px;
+    opacity:0.8;
   }
   div#eventName {
     margin-left:100px;
     overflow:hidden;
     white-space: nowrap;
-    font-size:175px;
+    font-size:75px;
     padding-top:20px;
+    background-color:black;
+    border:3px solid back;
+    border-radius:15px;
+    padding:10px;
+    opacity:0.8;
   }
   div#mySlider {
     position:absolute;
@@ -100,6 +136,9 @@
   }
 </style>
 <div id="container">
+  <div id="countdown">
+
+  </div>
   <div id="mySlider"></div>
   <div id="eventInfo">
     <div id="dateTime">Feb<br />26</div>

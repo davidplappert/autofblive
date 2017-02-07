@@ -63,7 +63,24 @@ class WelcomeController < ApplicationController
         end
       end
     end
-    logger.debug @outputEvents.to_yaml
+    #logger.debug @outputEvents.to_yaml
+    # setup countdown timer
+    @outputTimer = nil
+    times = eval(getconfig('service_times'))
+    times.each do |time|
+      nextServciceTime = DateTime.now.beginning_of_week(start_day = :sunday) + time[:days].days + time[:hours].hours + time[:minutes].minutes
+      timeToNextServiceTime = nextServciceTime.to_i - DateTime.now.to_i
+      if timeToNextServiceTime <= 0
+        timeToNextServiceTime = timeToNextServiceTime + 1.week
+      end
+      if @outputTimer.nil? || @outputTimer.to_i > timeToNextServiceTime.to_i
+        @outputTimer = timeToNextServiceTime
+      end
+    end
+    #if @outputTimer > 3.hours.to_i
+    #  @outputTimer = nil
+    #end
+    logger.debug @outputTimer
   end
 
   def setup
