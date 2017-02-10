@@ -97,6 +97,7 @@ class WelcomeController < ApplicationController
     #logger.debug getconfig('fb_page_id')
     logger.debug getconfig('fb_user_access_token')
     setconfig('fb_page_access_token',@graph_user.get_page_access_token(getconfig('fb_page_id')))
+    redirect_to "/eventslides"
   end
 
   private
