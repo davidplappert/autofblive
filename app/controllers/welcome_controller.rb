@@ -6,12 +6,19 @@ class WelcomeController < ApplicationController
       setup
     else
       if getconfig('fb_user_access_token') == '0' || getconfig('fb_page_access_token') == '0'
-        @output = "<a href='#{@oauth.url_for_oauth_code(:permissions => "pages_show_list,pages_manage_cta,read_insights,manage_pages,publish_pages,publish_actions,business_management,user_managed_groups,user_videos,user_events")}''>FB Auth 1</a>"
-        @output = @output.html_safe
+        if getconfig('fb_app_id') == '0'
+          @output = "Please insert app id/keys"
+        else
+          @output = "<a href='#{@oauth.url_for_oauth_code(:permissions => "pages_show_list,pages_manage_cta,read_insights,manage_pages,publish_pages,publish_actions,business_management,user_managed_groups,user_videos,user_events")}''>FB Auth 1</a>"
+          @output = @output.html_safe
+        end
       else
         @graph_user = Koala::Facebook::API.new(getconfig('fb_user_access_token'))
         @graph_page = Koala::Facebook::API.new(getconfig('fb_page_access_token'))
         @output = "You are authed with FB now!"
+        if request.original_fullpath == "/"
+          redirect_to "/eventslides"
+        end
       end
     end
   end
@@ -90,7 +97,6 @@ class WelcomeController < ApplicationController
     #logger.debug getconfig('fb_page_id')
     logger.debug getconfig('fb_user_access_token')
     setconfig('fb_page_access_token',@graph_user.get_page_access_token(getconfig('fb_page_id')))
-    redirect_to request.original_url
   end
 
   private
