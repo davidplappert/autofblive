@@ -5,8 +5,7 @@
   $(document).ready(function() {
     var eventSlides = [];
     var eventInfo = [];
-    <% logger.debugg Dir.pwd %>
-    <% Dir.foreach('app/assets/images/') do |item|
+    <% Dir.foreach('/root/autofblive/app/assets/images/') do |item|
       next if item == '.' or item == '..' or item == '.keep' or item == 'prayer-slide-cut.jpg'
     %>
        eventSlides.push({src: '/assets/<%=item%>'});
