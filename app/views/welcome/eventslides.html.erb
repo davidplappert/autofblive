@@ -5,10 +5,10 @@
   $(document).ready(function() {
     var eventSlides = [];
     var eventInfo = [];
-    <% Dir.foreach('/root/autofblive/app/assets/images/') do |item|
+    <% Dir.foreach('/root/autofblive/app/assets/images/stale/') do |item|
       next if item == '.' or item == '..' or item == '.keep' or item == 'prayer-slide-cut.jpg'
     %>
-       eventSlides.push({src: '/assets/<%=item%>'});
+       eventSlides.push({src: '/assets/stale/<%=item%>'});
        eventInfo.push({time: '', name:''});
     <%
     end

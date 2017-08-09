@@ -1,6 +1,7 @@
 class WelcomeController < ApplicationController
   def inc
     require 'koala'
+    require 'open-uri'
     @oauth = Koala::Facebook::OAuth.new(getconfig('fb_app_id'), getconfig('fb_app_secret'), request.original_url)
     if request.GET['code']
       setup
@@ -59,6 +60,7 @@ class WelcomeController < ApplicationController
             :name => event['name'],
             :cover => @graph_page.get_object(event["id"],{fields:['cover']})['cover']['source']
           }
+          ##Figure out the event time info
           startTime = Time.parse(event['start_time'].to_s)
           if endTime.strftime("%m/%d/%y") == startTime.strftime("%m/%d/%y")
             #eventInfo[:time] = "#{startTime.strftime("%A %B, #{startTime.day.ordinalize} from %I:%m")} to #{endTime.strftime("%I:%m %p")}"
@@ -66,28 +68,16 @@ class WelcomeController < ApplicationController
           else
             eventInfo[:time] = startTime
           end
+          ##get the images to be hosted locally
+          open('/root/autofblive/app/assets/images/fb/'+event["id"]+'.jpg', 'wb') do |file|
+            file << open(eventInfo[:cover]).read
+            eventInfo[:cover] = "/assets/fb/" + event["id"] + ".jpg"
+          end
           @outputEvents << eventInfo
         end
       end
     end
-    #logger.debug @outputEvents.to_yaml
-    # setup countdown timer
-    @outputTimer = nil
-    times = eval(getconfig('service_times'))
-    times.each do |time|
-      nextServciceTime = DateTime.now.beginning_of_week(start_day = :sunday) + time[:days].days + time[:hours].hours + time[:minutes].minutes
-      timeToNextServiceTime = nextServciceTime.to_i - DateTime.now.to_i
-      if timeToNextServiceTime <= 0
-        timeToNextServiceTime = timeToNextServiceTime + 1.week
-      end
-      if @outputTimer.nil? || @outputTimer.to_i > timeToNextServiceTime.to_i
-        @outputTimer = timeToNextServiceTime
-      end
-    end
-    #if @outputTimer > 3.hours.to_i
-    #  @outputTimer = nil
-    #end
-    logger.debug @outputTimer
+    logger.debug @outputEvents.to_yaml
   end
 
   def setup
